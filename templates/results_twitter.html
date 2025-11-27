@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twitter Results</title>
+</head>
+<body>
+    <h1>Twitter Results</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Link</th>
+                <th>Likes</th>
+                <th>Replies</th>
+                <th>Retweets</th>
+                <th>Quotes</th>
+                <th>Comments</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in results %}
+            <tr>
+                <td>{{ result.name }}</td>
+                <td><a href="{{ result.link }}">{{ result.link }}</a></td>
+                <td>{{ result.likes }}</td>
+                <td>{{ result.replies }}</td>
+                <td>{{ result.retweets }}</td>
+                <td>{{ result.quotes }}</td>
+                <td>
+                    <ul>
+                        {% for comment in result.comments %}
+                        <li>{{ comment }}</li>
+                        {% endfor %}
+                    </ul>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

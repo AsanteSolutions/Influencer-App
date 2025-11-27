@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analytics Results - X Dashboard</title>
+    <title>Analytics Results</title>
     <style>
         * {
             margin: 0;
@@ -76,45 +76,6 @@
             box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
         }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            text-align: center;
-            transition: transform 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .stat-card .icon {
-            font-size: 32px;
-            margin-bottom: 10px;
-        }
-
-        .stat-card .value {
-            font-size: 28px;
-            font-weight: 700;
-            color: #1a202c;
-            margin-bottom: 5px;
-        }
-
-        .stat-card .label {
-            font-size: 14px;
-            color: #718096;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
         .table-container {
             background: white;
             border-radius: 15px;
@@ -164,7 +125,7 @@
             border-bottom: none;
         }
 
-        .tweet-link {
+        .post-link {
             color: #667eea;
             text-decoration: none;
             font-weight: 500;
@@ -176,7 +137,7 @@
             text-overflow: ellipsis;
         }
 
-        .tweet-link:hover {
+        .post-link:hover {
             text-decoration: underline;
         }
 
@@ -190,138 +151,16 @@
             font-weight: 600;
             color: #2d3748;
         }
-
-        .metric.likes {
-            background: #fed7d7;
-            color: #c53030;
-        }
-
-        .metric.replies {
-            background: #bee3f8;
-            color: #2c5282;
-        }
-
-        .metric.retweets {
-            background: #c6f6d5;
-            color: #22543d;
-        }
-
-        .metric.quotes {
-            background: #feebc8;
-            color: #7c2d12;
-        }
-
-        .comments-box {
-            max-height: 150px;
-            overflow-y: auto;
-            background: #f7fafc;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #e2e8f0;
-            max-width: 400px;
-        }
-
-        .comments-box::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .comments-box::-webkit-scrollbar-track {
-            background: #edf2f7;
-            border-radius: 4px;
-        }
-
-        .comments-box::-webkit-scrollbar-thumb {
-            background: #cbd5e0;
-            border-radius: 4px;
-        }
-
-        .comments-box ul {
-            list-style: none;
-        }
-
-        .comments-box li {
-            padding: 8px 0;
-            border-bottom: 1px solid #e2e8f0;
-            color: #4a5568;
-            font-size: 13px;
-            line-height: 1.5;
-        }
-
-        .comments-box li:last-child {
-            border-bottom: none;
-        }
-
-        .no-comments {
-            color: #a0aec0;
-            font-style: italic;
-            text-align: center;
-            padding: 10px;
-        }
-
-        .name-col {
-            font-weight: 600;
-            color: #1a202c;
-        }
-
-        @media (max-width: 768px) {
-            .header {
-                padding: 20px;
-            }
-
-            .header h1 {
-                font-size: 22px;
-            }
-
-            th, td {
-                padding: 15px 10px;
-                font-size: 13px;
-            }
-
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .tweet-link {
-                max-width: 150px;
-            }
-
-            .comments-box {
-                max-width: 250px;
-            }
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <div>
-                <h1>📊 Analytics Results</h1>
-                <p>Tweet performance metrics and insights</p>
+                <h1>📊 Analysis for <a href="{{ link }}" target="_blank">{{ platform }}</a> Post</h1>
+                <p><strong>Link:</strong> <a href="{{ link }}" target="_blank" class="post-link">{{ link }}</a></p>
             </div>
-            <a href="/" class="btn-back">← Upload New File</a>
-        </div>
-
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="icon">📝</div>
-                <div class="value" id="totalTweets">{{ results|length }}</div>
-                <div class="label">Total Tweets</div>
-            </div>
-            <div class="stat-card">
-                <div class="icon">❤️</div>
-                <div class="value" id="totalLikes">0</div>
-                <div class="label">Total Likes</div>
-            </div>
-            <div class="stat-card">
-                <div class="icon">🔄</div>
-                <div class="value" id="totalRetweets">0</div>
-                <div class="label">Total Retweets</div>
-            </div>
-            <div class="stat-card">
-                <div class="icon">💬</div>
-                <div class="value" id="totalReplies">0</div>
-                <div class="label">Total Replies</div>
-            </div>
+            <a href="/" class="btn-back">← Back to Home</a>
         </div>
 
         <div class="table-container">
@@ -329,78 +168,70 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Influencer</th>
-                            <th>Tweet Link</th>
-                            <th>Likes</th>
-                            <th>Replies</th>
-                            <th>Retweets</th>
-                            <th>Quotes</th>
-                            <th>Comments</th>
+                            <th>Metric</th>
+                            <th>Value</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for row in results %}
-                        <tr data-likes="{{ row.likes if row.likes != 'N/A' else 0 }}" 
-                            data-retweets="{{ row.retweets if row.retweets != 'N/A' else 0 }}" 
-                            data-replies="{{ row.replies if row.replies != 'N/A' else 0 }}">
-                            <td class="name-col">{{ row.name }}</td>
-                            <td>
-                                <a href="{{ row.link }}" target="_blank" class="tweet-link" title="{{ row.link }}">
-                                    {{ row.link }}
-                                </a>
-                            </td>
-                            <td>
-                                <span class="metric likes">❤️ {{ row.likes }}</span>
-                            </td>
-                            <td>
-                                <span class="metric replies">💬 {{ row.replies }}</span>
-                            </td>
-                            <td>
-                                <span class="metric retweets">🔄 {{ row.retweets }}</span>
-                            </td>
-                            <td>
-                                <span class="metric quotes">💭 {{ row.quotes }}</span>
-                            </td>
-                            <td>
-                                {% if row.comments %}
+                        {% if platform == 'Twitter' %}
+                            <tr>
+                                <td>Likes</td>
+                                <td><span class="metric">{{ metrics.likes }}</span></td>
+                            </tr>
+                            <tr>
+                                <td>Replies</td>
+                                <td><span class="metric">{{ metrics.replies }}</span></td>
+                            </tr>
+                            <tr>
+                                <td>Retweets</td>
+                                <td><span class="metric">{{ metrics.retweets }}</span></td>
+                            </tr>
+                            <tr>
+                                <td>Quotes</td>
+                                <td><span class="metric">{{ metrics.quotes }}</span></td>
+                            </tr>
+                        {% elif platform == 'Facebook' %}
+                            <tr>
+                                <td>Reactions</td>
+                                <td><span class="metric">{{ metrics.reactions }}</span></td>
+                            </tr>
+                            <tr>
+                                <td>Comments</td>
+                                <td><span class="metric">{{ metrics.comments }}</span></td>
+                            </tr>
+                            <tr>
+                                <td>Shares</td>
+                                <td><span class="metric">{{ metrics.shares }}</span></td>
+                            </tr>
+                        {% elif platform == 'Instagram' %}
+                            <tr>
+                                <td>Likes</td>
+                                <td><span class="metric">{{ metrics.likes }}</span></td>
+                            </tr>
+                            <tr>
+                                <td>Comments</td>
+                                <td><span class="metric">{{ metrics.comments }}</span></td>
+                            </tr>
+                            {% if metrics.comment_list %}
+                            <tr>
+                                <td>Comment Samples</td>
+                                <td>
                                     <div class="comments-box">
                                         <ul>
-                                        {% for c in row.comments %}
+                                        {% for c in metrics.comment_list %}
                                             <li>{{ c }}</li>
                                         {% endfor %}
                                         </ul>
                                     </div>
-                                {% else %}
-                                    <div class="no-comments">No comments</div>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
+                                </td>
+                            </tr>
+                            {% endif %}
+                        {% endif %}
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
-
-    <script>
-        // Calculate totals
-        const rows = document.querySelectorAll('tbody tr');
-        let totalLikes = 0;
-        let totalRetweets = 0;
-        let totalReplies = 0;
-
-        rows.forEach(row => {
-            totalLikes += parseInt(row.dataset.likes) || 0;
-            totalRetweets += parseInt(row.dataset.retweets) || 0;
-            totalReplies += parseInt(row.dataset.replies) || 0;
-        });
-
-        // Format numbers with commas
-        const formatNumber = (num) => num.toLocaleString();
-
-        document.getElementById('totalLikes').textContent = formatNumber(totalLikes);
-        document.getElementById('totalRetweets').textContent = formatNumber(totalRetweets);
-        document.getElementById('totalReplies').textContent = formatNumber(totalReplies);
-    </script>
 </body>
 </html>
+

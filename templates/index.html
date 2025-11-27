@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Media Analytics</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 30px;
+            color: #333;
+        }
+        .upload-section, .link-section {
+            margin-bottom: 30px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            text-decoration: none;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin: 5px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .btn-facebook { background-color: #3b5998; }
+        .btn-instagram { background-color: #e4405f; }
+        .btn-twitter { background-color: #1da1f2; }
+        .link-input {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .flash-message {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            color: #fff;
+        }
+        .flash-error { background-color: #dc3545; }
+        .flash-success { background-color: #28a745; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Social Media Analytics</h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="upload-section">
+            <h2>Upload CSV File</h2>
+            <a href="{{ url_for('upload_facebook') }}" class="btn btn-facebook">Facebook</a>
+            <a href="{{ url_for('upload_instagram') }}" class="btn btn-instagram">Instagram</a>
+            <a href="{{ url_for('upload_twitter') }}" class="btn btn-twitter">Twitter</a>
+        </div>
+
+        <div class="link-section">
+            <h2>Analyze Single Link</h2>
+            <form id="analyzeForm" action="{{ url_for('analyze_link') }}" method="post">
+                    <input type="text" name="link" id="analyzeLink" class="link-input" placeholder="Enter a valid Facebook, Instagram, or Twitter link">
+                    <button id="analyzeBtn" type="submit" class="btn">Analyze</button>
+                </form>
+                <div id="clientError" style="display:none; color:#dc3545; margin-top:8px; font-weight:600;">Please enter a valid Facebook, Instagram, or Twitter link.</div>
+                <script>
+                    const analyzeForm = document.getElementById('analyzeForm');
+                    const analyzeLinkInput = document.getElementById('analyzeLink');
+                    const analyzeBtn = document.getElementById('analyzeBtn');
+                    const clientError = document.getElementById('clientError');
+
+                    analyzeForm.addEventListener('submit', (e) => {
+                        const val = analyzeLinkInput.value.trim();
+                        if (!val) return; // required on server side
+
+                        // Basic domain validation
+                        const ok = /\b(twitter\.com|x\.com|facebook\.com|fb\.watch|instagram\.com)\b/i.test(val);
+                        if (!ok) {
+                            e.preventDefault();
+                            clientError.style.display = 'block';
+                            return false;
+                        }
+
+                        clientError.style.display = 'none';
+                        analyzeBtn.textContent = '⏳ Analyzing...';
+                        analyzeBtn.disabled = true;
+                    });
+                </script>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,6 +1,7 @@
-Flask
-pandas
-openpyxl
-requests
-python-dotenv
-playwright
+Flask>=2.2.5
+pandas>=1.5.3
+openpyxl>=3.1.2
+requests>=2.31.0
+python-dotenv>=1.0.0
+playwright>=1.34.0
+gunicorn>=20.1.0

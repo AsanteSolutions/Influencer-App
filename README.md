@@ -122,6 +122,21 @@ A professional analytics dashboard for X (Twitter), Facebook, and Instagram infl
 - **Comments**: Comment fetching may require elevated API access on some platforms.
  - **Playwright**: Instagram scraping uses Playwright; ensure browsers are installed by running `playwright install` and that Playwright is in your virtualenv.
 
+## 🛠 CI / Docker & GitHub Actions
+
+We include a sample GitHub Actions workflow that builds a Docker image and optionally pushes to Azure Container Registry (ACR): `.github/workflows/docker-build-push.yml`.
+
+### Required GitHub Secrets for pushing to ACR
+- `ACR_LOGIN_SERVER` - login server for your ACR (e.g. myregistry.azurecr.io)
+- `ACR_USERNAME` - username for ACR (or service principal username)
+- `ACR_PASSWORD` - password for ACR (or service principal password)
+
+If those secrets are not set, the workflow will only build the image and attach it as an artifact.
+
+### Using the workflow
+1. Commit changes and push to `main` (or run the workflow manually from Actions -> workflow_dispatch).
+2. To push to ACR, go to your repo Settings -> Secrets -> Actions and add the 3 ACR secrets above.
+
 ## 📝 License
 
 This project is for internal use. Please ensure compliance with social media platform API terms of service.

@@ -84,12 +84,13 @@
             <a href="{{ url_for('upload_facebook') }}" class="btn btn-facebook">Facebook</a>
             <a href="{{ url_for('upload_instagram') }}" class="btn btn-instagram">Instagram</a>
             <a href="{{ url_for('upload_twitter') }}" class="btn btn-twitter">Twitter</a>
+            <a href="{{ url_for('upload_tiktok') }}" class="btn" style="background: linear-gradient(135deg,#06d5d5,#7a00ff);">TikTok</a>
         </div>
 
         <div class="link-section">
             <h2>Analyze Single Link</h2>
             <form id="analyzeForm" action="{{ url_for('analyze_link') }}" method="post">
-                    <input type="text" name="link" id="analyzeLink" class="link-input" placeholder="Enter a valid Facebook, Instagram, or Twitter link">
+                    <input type="text" name="link" id="analyzeLink" class="link-input" placeholder="Enter a valid Facebook, Instagram, Twitter, or TikTok link">
                     <button id="analyzeBtn" type="submit" class="btn">Analyze</button>
                 </form>
                 <div id="clientError" style="display:none; color:#dc3545; margin-top:8px; font-weight:600;">Please enter a valid Facebook, Instagram, or Twitter link.</div>
@@ -104,7 +105,7 @@
                         if (!val) return; // required on server side
 
                         // Basic domain validation
-                        const ok = /\b(twitter\.com|x\.com|facebook\.com|fb\.watch|instagram\.com)\b/i.test(val);
+                        const ok = /\b(twitter\.com|x\.com|facebook\.com|fb\.watch|instagram\.com|tiktok\.com|vm\.tiktok.com)\b/i.test(val);
                         if (!ok) {
                             e.preventDefault();
                             clientError.style.display = 'block';

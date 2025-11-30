@@ -44,9 +44,8 @@ A professional analytics dashboard for X (Twitter), Facebook, and Instagram infl
     python -m playwright install chromium
     ```
 
-4.  **Create a `.env` file** in the root directory and add your API keys:
+4.  **Create a `.env` file** in the root directory and add your API keys if you want to enable the Facebook API (the app uses Playwright for Twitter/TikTok/Instagram scraping by default):
     ```
-    TWITTER_BEARER_TOKEN=<your_twitter_bearer_token>
     FACEBOOK_ACCESS_TOKEN=<your_facebook_access_token>
     INSTAGRAM_ACCESS_TOKEN=<your_instagram_access_token>
     FLASK_SECRET_KEY=<a_super_secret_key>
@@ -96,10 +95,9 @@ A professional analytics dashboard for X (Twitter), Facebook, and Instagram infl
 ## 📁 Project Structure
 ```
 .
-├── app.py                          # Main Flask application
-├── app_twitter.py                  # Twitter-specific routes
+├── app.py                          # Main Flask application (single entrypoint — handles Twitter/Instagram/TikTok via Playwright and Facebook via Graph API)
 ├── requirements.txt                # Python dependencies
-├── .env                            # API credentials (not in repo)
+├── .env                            # API credentials (only Facebook Access Token is required)
 ├── templates/
 │   ├── index.html                  # Main landing page
 │   ├── results.html                # Unified results page for single link analysis
@@ -110,8 +108,13 @@ A professional analytics dashboard for X (Twitter), Facebook, and Instagram infl
 │   ├── upload_twitter.html         # Twitter upload page
 │   ├── results_twitter.html        # Twitter results page
 │   ├── error_facebook.html         # Facebook error page
-│   └── error_instagram.html        # Instagram error page
+│   ├── error_instagram.html        # Instagram error page
+│   ├── error_twitter.html          # Twitter error page
+│   └── error_tiktok.html           # TikTok error page
 └── README.md
+
+Other files:
+├── legacy/                         # Archived per-platform apps before consolidation into `app.py`
 ```
 
 ## ⚠️ Important Notes
@@ -120,7 +123,8 @@ A professional analytics dashboard for X (Twitter), Facebook, and Instagram infl
 - **Authentication**: Ensure your access tokens have the required permissions.
 - **Instagram**: Requires Business or Creator accounts for analytics.
 - **Comments**: Comment fetching may require elevated API access on some platforms.
- - **Playwright**: Instagram scraping uses Playwright; ensure browsers are installed by running `playwright install` and that Playwright is in your virtualenv.
+ - **Playwright**: Twitter, Instagram, and TikTok scraping uses Playwright; ensure browsers are installed by running `python -m playwright install chromium` and that Playwright is available in your virtualenv.
+ - **Scraping performance**: Playwright scrapers open a headless browser and can be slow and memory-intensive; consider running scraping in a background worker (e.g., Celery) or queue and caching results for heavy loads.
 
 ## 🛠 CI / Docker & GitHub Actions
 

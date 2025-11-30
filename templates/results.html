@@ -190,6 +190,20 @@
                                 <td>Quotes</td>
                                 <td><span class="metric">{{ metrics.quotes }}</span></td>
                             </tr>
+                            {% if metrics.comment_list %}
+                            <tr>
+                                <td>Comment Samples</td>
+                                <td>
+                                    <div class="comments-box">
+                                        <ul>
+                                        {% for c in metrics.comment_list %}
+                                            <li>{{ c }}</li>
+                                        {% endfor %}
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endif %}
                         {% elif platform == 'Facebook' %}
                             <tr>
                                 <td>Reactions</td>
@@ -212,6 +226,29 @@
                                 <td>Comments</td>
                                 <td><span class="metric">{{ metrics.comments }}</span></td>
                             </tr>
+                        {% elif platform == 'TikTok' %}
+                            <tr>
+                                <td>Likes</td>
+                                <td><span class="metric">{{ metrics.likes }}</span></td>
+                            </tr>
+                            <tr>
+                                <td>Comments</td>
+                                <td><span class="metric">{{ metrics.comments }}</span></td>
+                            </tr>
+                            {% if metrics.comment_list %}
+                            <tr>
+                                <td>Comment Samples</td>
+                                <td>
+                                    <div class="comments-box">
+                                        <ul>
+                                        {% for c in metrics.comment_list %}
+                                            <li>{{ c }}</li>
+                                        {% endfor %}
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endif %}
                             {% if metrics.comment_list %}
                             <tr>
                                 <td>Comment Samples</td>

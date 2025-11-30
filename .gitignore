@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.egg-info/
+dist/
+build/
+
+# Virtualenv
+venv/
+env/
+.venv/
+
+# IDEs
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Secrets
+.env
+*.env
+
+# Playwright browsers (optional)
+.playwright/

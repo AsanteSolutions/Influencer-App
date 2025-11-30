@@ -1,73 +1,71 @@
-import os
 import re
+import asyncio
 import pandas as pd
-import requests
 from flask import Flask, render_template, request
-from dotenv import load_dotenv
-
-load_dotenv()
+from playwright.async_api import async_playwright
 
 app = Flask(__name__)
 
-# Your Twitter/X Bearer Token
-BEARER_TOKEN = os.getenv("TWITTER_BEARER_TOKEN")
-
-def extract_tweet_id(url):
-    """Extract tweet ID from the post URL."""
+# ---------------------------------------------------------
+# Extract Tweet ID from URL
+# ---------------------------------------------------------
+def extract_tweet_id(url: str):
     match = re.search(r"status/(\d+)", url)
-    if match:
-        return match.group(1)
-    return None
+    return match.group(1) if match else None
 
 
-def get_tweet_metrics(tweet_id):
-    url = f"https://api.twitter.com/2/tweets/{tweet_id}"
-    params = {
-        "tweet.fields": "public_metrics,conversation_id"
-    }
-    headers = {
-        "Authorization": f"Bearer {BEARER_TOKEN}"
-    }
+# ---------------------------------------------------------
+# Playwright scraping function
+# ---------------------------------------------------------
+async def scrape_tweet(tweet_url):
+    async with async_playwright() as pw:
+        browser = await pw.chromium.launch(headless=True)
+        page = await browser.new_page()
 
-    res = requests.get(url, headers=headers, params=params)
+        try:
+            await page.goto(tweet_url, timeout=60000)
 
-    if res.status_code != 200:
-        return {"error": res.text}
+            # Wait for tweet container
+            await page.wait_for_selector("article", timeout=15000)
 
-    data = res.json().get("data", {})
+            # Extract metrics
+            likes = await page.locator('[data-testid="like"]').text_content()
+            replies = await page.locator('[data-testid="reply"]').text_content()
+            retweets = await page.locator('[data-testid="retweet"]').text_content()
 
-    metrics = data.get("public_metrics", {})
+            # Extract views if available
+            views = "N/A"
+            try:
+                views = await page.locator("span:below(:text('Views'))").nth(0).text_content()
+            except:
+                pass
 
-    return {
-        "likes": metrics.get("like_count", 0),
-        "replies": metrics.get("reply_count", 0),
-        "retweets": metrics.get("retweet_count", 0),
-        "quotes": metrics.get("quote_count", 0),
-        "conversation_id": data.get("conversation_id")
-    }
+            # Extract comments
+            comments = []
+            comment_elements = page.locator('div[data-testid="tweetText"]')
 
+            count = await comment_elements.count()
+            for i in range(min(count, 20)):  # limit to 20 comments
+                comments.append(await comment_elements.nth(i).text_content())
 
-def get_tweet_replies(conversation_id):
-    """
-    Fetch actual comments (replies).
-    ⚠ Requires Elevated/Enterprise Twitter access.
-    """
-    url = "https://api.twitter.com/2/tweets/search/recent"
-    params = {
-        "query": f"conversation_id:{conversation_id}",
-        "tweet.fields": "author_id,created_at,text"
-    }
-    headers = {"Authorization": f"Bearer {BEARER_TOKEN}"}
+            await browser.close()
 
-    res = requests.get(url, headers=headers, params=params)
+            return {
+                "likes": likes.strip() if likes else "0",
+                "replies": replies.strip() if replies else "0",
+                "retweets": retweets.strip() if retweets else "0",
+                "views": views,
+                "comments": comments
+            }
 
-    if res.status_code != 200:
-        return []
-
-    tweets = res.json().get("data", [])
-    return [t["text"] for t in tweets]
+        except Exception as e:
+            await browser.close()
+            return {"error": str(e)}
 
 
+# ---------------------------------------------------------
+# Flask Routes
+# ---------------------------------------------------------
 @app.route("/")
 def home():
     return render_template("upload_twitter.html")
@@ -86,11 +84,12 @@ def upload_file():
 
     results = []
 
-    for index, row in df.iterrows():
+    for _, row in df.iterrows():
         name = row["NAME"]
         link = row["LINK"]
 
         tweet_id = extract_tweet_id(str(link))
+
         if not tweet_id:
             results.append({
                 "name": name,
@@ -98,29 +97,29 @@ def upload_file():
                 "likes": "N/A",
                 "replies": "N/A",
                 "retweets": "N/A",
-                "quotes": "N/A",
-                "comments": []
+                "views": "N/A",
+                "comments": ["Invalid link"]
             })
             continue
 
-        metrics = get_tweet_metrics(tweet_id)
-
-        comments = []
-        if "conversation_id" in metrics:
-            comments = get_tweet_replies(metrics["conversation_id"])
+        # Playwright must run inside an event loop
+        scrape_result = asyncio.run(scrape_tweet(link))
 
         results.append({
             "name": name,
             "link": link,
-            "likes": metrics.get("likes", 0),
-            "replies": metrics.get("replies", 0),
-            "retweets": metrics.get("retweets", 0),
-            "quotes": metrics.get("quotes", 0),
-            "comments": comments
+            "likes": scrape_result.get("likes", "0"),
+            "replies": scrape_result.get("replies", "0"),
+            "retweets": scrape_result.get("retweets", "0"),
+            "views": scrape_result.get("views", "N/A"),
+            "comments": scrape_result.get("comments", [])
         })
 
     return render_template("results_twitter.html", results=results)
 
 
+# ---------------------------------------------------------
+# Run app
+# ---------------------------------------------------------
 if __name__ == "__main__":
     app.run(debug=True, port=5003)

@@ -1,0 +1,98 @@
+{% extends "results_base.html" %}
+
+{% block results_title %}Twitter Analytics Results{% endblock %}
+
+{% block bg_gradient %}linear-gradient(135deg, #1da1f2 0%, #0d8bd9 100%){% endblock %}
+
+{% block btn_bg %}linear-gradient(135deg, #1da1f2 0%, #0d8bd9 100%){% endblock %}
+
+{% block thead_bg %}linear-gradient(135deg, #1da1f2 0%, #0d8bd9 100%){% endblock %}
+
+{% block link_color %}#1da1f2{% endblock %}
+
+{% block header_title %}🐦 Twitter Analytics Results{% endblock %}
+
+{% block stats %}
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="icon">📝</div>
+        <div class="value" id="totalTweets">{{ results|length }}</div>
+        <div class="label">Total Tweets</div>
+    </div>
+    <div class="stat-card">
+        <div class="icon">❤️</div>
+        <div class="value" id="totalLikes">0</div>
+        <div class="label">Total Likes</div>
+    </div>
+    <div class="stat-card">
+        <div class="icon">🔄</div>
+        <div class="value" id="totalRetweets">0</div>
+        <div class="label">Total Retweets</div>
+    </div>
+    <div class="stat-card">
+        <div class="icon">💬</div>
+        <div class="value" id="totalReplies">0</div>
+        <div class="label">Total Replies</div>
+    </div>
+</div>
+{% endblock %}
+
+{% block table_content %}
+<table>
+    <thead>
+        <tr>
+            <th>Influencer</th>
+            <th>Tweet Link</th>
+            <th>Likes</th>
+            <th>Retweets</th>
+            <th>Replies</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in results %}
+        <tr data-likes="{{ row.likes if row.likes != 'N/A' else 0 }}" 
+            data-retweets="{{ row.retweets if row.retweets != 'N/A' else 0 }}" 
+            data-replies="{{ row.replies if row.replies != 'N/A' else 0 }}">
+            <td class="name-col">{{ row.name }}</td>
+            <td>
+                <a href="{{ row.link }}" target="_blank" class="post-link" title="{{ row.link }}">
+                    {{ row.link }}
+                </a>
+            </td>
+            <td>
+                <span class="metric reactions">❤️ {{ row.likes }}</span>
+            </td>
+            <td>
+                <span class="metric shares">🔄 {{ row.retweets }}</span>
+            </td>
+            <td>
+                <span class="metric comments">💬 {{ row.replies }}</span>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Calculate totals
+    const rows = document.querySelectorAll('tbody tr');
+    let totalLikes = 0;
+    let totalRetweets = 0;
+    let totalReplies = 0;
+
+    rows.forEach(row => {
+        totalLikes += parseInt(row.dataset.likes) || 0;
+        totalRetweets += parseInt(row.dataset.retweets) || 0;
+        totalReplies += parseInt(row.dataset.replies) || 0;
+    });
+
+    // Format numbers with commas
+    const formatNumber = (num) => num.toLocaleString();
+
+    document.getElementById('totalLikes').textContent = formatNumber(totalLikes);
+    document.getElementById('totalRetweets').textContent = formatNumber(totalRetweets);
+    document.getElementById('totalReplies').textContent = formatNumber(totalReplies);
+</script>
+{% endblock %}

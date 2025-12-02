@@ -1,0 +1,85 @@
+{% extends "results_base.html" %}
+
+{% block results_title %}Instagram Analytics Results{% endblock %}
+
+{% block bg_gradient %}linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%){% endblock %}
+
+{% block btn_bg %}linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%){% endblock %}
+
+{% block thead_bg %}linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%){% endblock %}
+
+{% block link_color %}#833ab4{% endblock %}
+
+{% block header_title %}📷 Instagram Analytics Results{% endblock %}
+
+{% block stats %}
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="icon">📝</div>
+        <div class="value" id="totalPosts">{{ results|length }}</div>
+        <div class="label">Total Posts</div>
+    </div>
+    <div class="stat-card">
+        <div class="icon">❤️</div>
+        <div class="value" id="totalLikes">0</div>
+        <div class="label">Total Likes</div>
+    </div>
+    <div class="stat-card">
+        <div class="icon">💬</div>
+        <div class="value" id="totalComments">0</div>
+        <div class="label">Total Comments</div>
+    </div>
+</div>
+{% endblock %}
+
+{% block table_content %}
+<table>
+    <thead>
+        <tr>
+            <th>Influencer</th>
+            <th>Post Link</th>
+            <th>Likes</th>
+            <th>Comments</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in results %}
+        <tr data-likes="{{ row.likes if row.likes != 'N/A' else 0 }}" 
+            data-comments="{{ row.comments if row.comments != 'N/A' else 0 }}">
+            <td class="name-col">{{ row.name }}</td>
+            <td>
+                <a href="{{ row.link }}" target="_blank" class="post-link" title="{{ row.link }}">
+                    {{ row.link }}
+                </a>
+            </td>
+            <td>
+                <span class="metric reactions">❤️ {{ row.likes }}</span>
+            </td>
+            <td>
+                <span class="metric comments">💬 {{ row.comments }}</span>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Calculate totals
+    const rows = document.querySelectorAll('tbody tr');
+    let totalLikes = 0;
+    let totalComments = 0;
+
+    rows.forEach(row => {
+        totalLikes += parseInt(row.dataset.likes) || 0;
+        totalComments += parseInt(row.dataset.comments) || 0;
+    });
+
+    // Format numbers with commas
+    const formatNumber = (num) => num.toLocaleString();
+
+    document.getElementById('totalLikes').textContent = formatNumber(totalLikes);
+    document.getElementById('totalComments').textContent = formatNumber(totalComments);
+</script>
+{% endblock %}

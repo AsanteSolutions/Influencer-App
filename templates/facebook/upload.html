@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}Facebook Analytics Dashboard{% endblock %}
+
+{% block bg_gradient %}linear-gradient(135deg, #1877f2 0%, #0e4f9e 100%){% endblock %}
+
+{% block btn_bg %}linear-gradient(135deg, #1877f2 0%, #0e4f9e 100%){% endblock %}
+
+{% block extra_css %}
+.upload-area {
+    border: 3px dashed #cbd5e0;
+    border-radius: 12px;
+    padding: 60px 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    background: #f7fafc;
+    position: relative;
+}
+
+.upload-area:hover {
+    border-color: #1877f2;
+    background: #edf2f7;
+}
+
+.upload-area.dragover {
+    border-color: #1877f2;
+    background: #e6f2ff;
+}
+
+.upload-icon {
+    font-size: 48px;
+    margin-bottom: 20px;
+    color: #1877f2;
+}
+
+.upload-area h3 {
+    font-size: 20px;
+    color: #2d3748;
+    margin-bottom: 10px;
+}
+
+.upload-area p {
+    font-size: 14px;
+    color: #718096;
+    margin-bottom: 20px;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+.file-name {
+    margin-top: 20px;
+    padding: 15px;
+    background: #e6f2ff;
+    border-radius: 8px;
+    color: #2d3748;
+    font-size: 14px;
+    display: none;
+}
+
+.file-name.active {
+    display: block;
+}
+
+.btn-primary {
+    box-shadow: 0 4px 15px rgba(24, 119, 242, 0.4);
+}
+
+.btn-primary:hover {
+    box-shadow: 0 6px 20px rgba(24, 119, 242, 0.6);
+}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="header">
+        <h1>📘 Facebook Analytics Dashboard</h1>
+        <p>Upload your CSV file to analyze post performance</p>
+    </div>
+
+    <form action="" method="post" enctype="multipart/form-data" id="uploadForm">
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">📊</div>
+            <h3>Drop your file here</h3>
+            <p>or click to browse</p>
+            <p style="color: #a0aec0; font-size: 12px;">Supports CSV and Excel files</p>
+            <input type="file" name="file" id="fileInput" accept=".csv,.xlsx,.xls" required>
+        </div>
+        
+        <div class="file-name" id="fileName"></div>
+
+        <button type="submit" class="btn-primary" id="submitBtn" disabled>
+            Upload & Process
+        </button>
+    </form>
+
+    <div class="info-box">
+        <h4>📋 File Requirements</h4>
+        <p>Your CSV file must contain columns named <strong>NAME</strong> and <strong>LINK</strong> with Facebook post URLs.</p>
+    </div>
+
+    <div style="text-align: center;">
+        <a href="{{ url_for('home') }}" class="btn-secondary">← Back to Home</a>
+    </div>
+</div>
+
+<script>
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const fileName = document.getElementById('fileName');
+    const submitBtn = document.getElementById('submitBtn');
+    const uploadForm = document.getElementById('uploadForm');
+
+    // Click to upload
+    uploadArea.addEventListener('click', () => {
+        fileInput.click();
+    });
+
+    // File selection
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            const file = e.target.files[0];
+            fileName.textContent = `✅ Selected: ${file.name}`;
+            fileName.classList.add('active');
+            submitBtn.disabled = false;
+        }
+    });
+
+    // Drag and drop
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        
+        if (e.dataTransfer.files.length > 0) {
+            fileInput.files = e.dataTransfer.files;
+            const file = e.dataTransfer.files[0];
+            fileName.textContent = `✅ Selected: ${file.name}`;
+            fileName.classList.add('active');
+            submitBtn.disabled = false;
+        }
+    });
+
+    // Form submission
+    uploadForm.addEventListener('submit', (e) => {
+        submitBtn.innerHTML = '⏳ Processing... Please wait';
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = '0.8';
+    });
+</script>
+{% endblock %}

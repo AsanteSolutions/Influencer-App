@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Error - Facebook Analytics{% endblock %}
+
+{% block bg_gradient %}linear-gradient(135deg, #1877f2 0%, #0e4f9e 100%){% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="header">
+        <h1 style="color: #c53030;">⚠️ {{ error }}</h1>
+        <p style="color: #742a2a;">{{ message }}</p>
+    </div>
+
+    <div class="info-box">
+        <h4>What happened?</h4>
+        <p>{{ message }}</p>
+    </div>
+
+    <div style="text-align: center; margin-top: 30px;">
+        <a href="{{ url_for('facebook.home') }}" class="btn-secondary">← Try Again</a>
+        <a href="{{ url_for('home') }}" class="btn-secondary" style="margin-left: 10px;">🏠 Home</a>
+    </div>
+</div>
+{% endblock %}

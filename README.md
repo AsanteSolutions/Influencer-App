@@ -1,22 +1,22 @@
 # Social Media Analytics Dashboard
 
-A professional analytics dashboard for X (Twitter), Facebook, and Instagram influencer campaigns.
+A Flask-based web application for analyzing social media post engagement across multiple platforms including Facebook, Instagram, Twitter/X, and TikTok.
 
 ## 🚀 Features
 
-- **Unified Interface**: A single dashboard to analyze posts from X (Twitter), Facebook, and Instagram.
-- **CSV Upload**: Upload a CSV file with a list of links to get a full report.
-- **Single Link Analysis**: Quickly analyze a single post by pasting the link.
-- **Modern UI**: A clean and modern interface for a great user experience.
-- **Responsive Design**: Works on both desktop and mobile devices.
-- **Error Handling**: Clear and user-friendly error messages.
+- **Multi-Platform Support**: Analyze posts from Facebook, Instagram, Twitter/X, and TikTok
+- **CSV Batch Processing**: Upload CSV files with multiple links for bulk analysis
+- **Single Link Analysis**: Quick analysis for individual post URLs
+- **Comprehensive Metrics**: Track likes, comments, shares, views, and other engagement metrics
+- **Modern UI**: Clean, responsive interface with platform-specific styling
+- **Blueprint Architecture**: Modular Flask blueprints for scalability and maintainability
 
 ## 📋 Requirements
 
-- Python 3.7+
+- Python 3.8+
 - Flask
+- Playwright
 - pandas
-- openpyxl
 - requests
 - python-dotenv
 
@@ -25,6 +25,7 @@ A professional analytics dashboard for X (Twitter), Facebook, and Instagram infl
 1.  **Clone the repository:**
     ```bash
     git clone <repository-url>
+    cd "X Test Run for Influencers"
     ```
 
 2.  **Create and activate a virtual environment:**
@@ -38,17 +39,16 @@ A professional analytics dashboard for X (Twitter), Facebook, and Instagram infl
     ```bash
     pip install -r requirements.txt
     ```
-    **Install Playwright and browsers** (required for Instagram scraping):
+
+4.  **Install Playwright browsers:**
     ```bash
-    pip install playwright
     python -m playwright install chromium
     ```
 
-4.  **Create a `.env` file** in the root directory and add your API keys if you want to enable the Facebook API (the app uses Playwright for Twitter/TikTok/Instagram scraping by default):
+5.  **Create a `.env` file** in the root directory with your credentials:
     ```
-    FACEBOOK_ACCESS_TOKEN=<your_facebook_access_token>
-    INSTAGRAM_ACCESS_TOKEN=<your_instagram_access_token>
-    FLASK_SECRET_KEY=<a_super_secret_key>
+    FACEBOOK_ACCESS_TOKEN=your_facebook_access_token_here
+    FLASK_SECRET_KEY=your_secret_key_here
     ```
 
 ## 🎯 Usage
@@ -58,89 +58,144 @@ A professional analytics dashboard for X (Twitter), Facebook, and Instagram infl
     python app.py
     ```
 
-2.  **Open your browser** and go to `http://127.0.0.1:5000`.
-
-## 📊 How It Works
+2.  **Open your browser** and go to `http://127.0.0.1:5000`
 
 ### CSV Upload
-- Click on the button for the social media platform you want to analyze (Facebook, Instagram, or Twitter).
-- Upload a CSV file with `NAME` and `LINK` columns.
-- The application will process the file and display a table of results.
+1. Click on a platform button (Facebook, Instagram, Twitter, or TikTok)
+2. Upload a CSV file with `NAME` and `LINK` columns
+3. View comprehensive engagement metrics for all posts
+
+**CSV Format Example:**
+```csv
+NAME,LINK
+John Doe,https://www.facebook.com/user/posts/123456789
+Jane Smith,https://twitter.com/user/status/987654321
+```
 
 ### Single Link Analysis
-- Paste a valid link from Facebook, Instagram, or Twitter into the input box.
-- Click "Analyze".
-- The application will fetch the metrics for the link and display them.
+1. On the home page, scroll to "Analyze Single Link"
+2. Paste a post URL from any supported platform
+3. Click "Analyze" to view engagement metrics
+
+## 🏗 Architecture
+
+### Blueprint Structure
+
+The application uses Flask Blueprints for modular organization:
+
+```
+app.py                          # Main application file
+blueprints/
+├── __init__.py                 # Blueprint exports
+├── facebook.py                 # Facebook routes and Graph API integration
+├── twitter.py                  # Twitter/X routes and Playwright scraper
+├── instagram.py                # Instagram routes and Playwright scraper
+└── tiktok.py                   # TikTok routes and Playwright scraper
+```
+
+**Blueprint Routes:**
+- Facebook: `/facebook/`
+- Twitter: `/twitter/`
+- Instagram: `/instagram/`
+- TikTok: `/tiktok/`
+
+### Template Organization
+
+Templates are organized by platform:
+
+```
+templates/
+├── base.html                   # Base template with shared styling
+├── results_base.html           # Base template for results pages
+├── index.html                  # Home page
+├── results.html                # Single link analysis results
+├── facebook/
+│   ├── upload.html
+│   ├── results.html
+│   └── error.html
+├── twitter/
+│   ├── upload.html
+│   ├── results.html
+│   └── error.html
+├── instagram/
+│   ├── upload.html
+│   ├── results.html
+│   └── error.html
+└── tiktok/
+    ├── upload.html
+    ├── results.html
+    └── error.html
+```
 
 ## 🔑 API Setup
 
-### Twitter/X API
-1. Go to [Twitter Developer Portal](https://developer.twitter.com/)
-2. Create a new app
-3. Generate a Bearer Token
-4. Add to `.env` as `TWITTER_BEARER_TOKEN`
-
 ### Facebook API
 1. Go to [Facebook Developers](https://developers.facebook.com/)
-2. Create an app
-3. Get a Page Access Token with appropriate permissions
+2. Create an app or use an existing one
+3. Get a Page Access Token with permissions: `pages_read_engagement`, `pages_read_user_content`
 4. Add to `.env` as `FACEBOOK_ACCESS_TOKEN`
 
-### Instagram API
-1. Instagram API requires a Facebook app
-2. Set up Instagram Graph API or Instagram Basic Display
-3. Get an access token (requires Instagram Business/Creator account)
-4. Add to `.env` as `INSTAGRAM_ACCESS_TOKEN`
+### Twitter/Instagram/TikTok
+These platforms use Playwright for web scraping (no API key required).
 
-## 📁 Project Structure
-```
-.
-├── app.py                          # Main Flask application (single entrypoint — handles Twitter/Instagram/TikTok via Playwright and Facebook via Graph API)
-├── requirements.txt                # Python dependencies
-├── .env                            # API credentials (only Facebook Access Token is required)
-├── templates/
-│   ├── index.html                  # Main landing page
-│   ├── results.html                # Unified results page for single link analysis
-│   ├── upload_facebook.html        # Facebook upload page
-│   ├── results_facebook.html       # Facebook results page
-│   ├── upload_instagram.html       # Instagram upload page
-│   ├── results_instagram.html      # Instagram results page
-│   ├── upload_twitter.html         # Twitter upload page
-│   ├── results_twitter.html        # Twitter results page
-│   ├── error_facebook.html         # Facebook error page
-│   ├── error_instagram.html        # Instagram error page
-│   ├── error_twitter.html          # Twitter error page
-│   └── error_tiktok.html           # TikTok error page
-└── README.md
+## 📊 Scraping Methods
 
-Other files:
-├── legacy/                         # Archived per-platform apps before consolidation into `app.py`
-```
+| Platform | Method | Metrics Collected |
+|----------|--------|-------------------|
+| Facebook | Graph API | Reactions, Comments, Shares, Comment text |
+| Twitter/X | Playwright | Likes, Retweets, Replies, Views |
+| Instagram | Playwright | Likes, Comments |
+| TikTok | Playwright | Likes, Comments, Saves, Shares |
+
+## 🛠 Development
+
+### Adding a New Platform
+
+1. Create a new blueprint file in `blueprints/` (e.g., `linkedin.py`)
+2. Implement scraping function or API integration
+3. Create templates in `templates/platform_name/`
+4. Register the blueprint in `app.py`
+5. Add platform button to `templates/index.html`
+6. Update the analyze_link function in `app.py`
+
+### Customizing Styling
+
+- Edit `templates/base.html` for global styles
+- Override `{% block bg_gradient %}` in platform templates for custom colors
 
 ## ⚠️ Important Notes
 
-- **Rate Limits**: Be aware of API rate limits for each platform.
-- **Authentication**: Ensure your access tokens have the required permissions.
-- **Instagram**: Requires Business or Creator accounts for analytics.
-- **Comments**: Comment fetching may require elevated API access on some platforms.
- - **Playwright**: Twitter, Instagram, and TikTok scraping uses Playwright; ensure browsers are installed by running `python -m playwright install chromium` and that Playwright is available in your virtualenv.
- - **Scraping performance**: Playwright scrapers open a headless browser and can be slow and memory-intensive; consider running scraping in a background worker (e.g., Celery) or queue and caching results for heavy loads.
+- **Rate Limits**: Be aware of API rate limits for Facebook
+- **Authentication**: Ensure Facebook access token has required permissions
+- **Playwright Performance**: Scraping opens headless browsers and can be slow; consider caching results
+- **Platform Changes**: Social media platforms may update their HTML structure, requiring scraper updates
+- **Terms of Service**: Respect platform Terms of Service when scraping data
 
-## 🛠 CI / Docker & GitHub Actions
+## 🐛 Troubleshooting
 
-We include a sample GitHub Actions workflow that builds a Docker image and optionally pushes to Azure Container Registry (ACR): `.github/workflows/docker-build-push.yml`.
+**Issue: "Playwright not installed" error**
+```bash
+python -m playwright install chromium
+```
 
-### Required GitHub Secrets for pushing to ACR
-- `ACR_LOGIN_SERVER` - login server for your ACR (e.g. myregistry.azurecr.io)
-- `ACR_USERNAME` - username for ACR (or service principal username)
-- `ACR_PASSWORD` - password for ACR (or service principal password)
+**Issue: "Facebook API error"**
+- Check your Facebook Access Token in `.env`
+- Verify token has necessary permissions
+- Ensure token hasn't expired
 
-If those secrets are not set, the workflow will only build the image and attach it as an artifact.
-
-### Using the workflow
-1. Commit changes and push to `main` (or run the workflow manually from Actions -> workflow_dispatch).
-2. To push to ACR, go to your repo Settings -> Secrets -> Actions and add the 3 ACR secrets above.
+**Issue: "Scraping fails"**
+- Platforms may have updated their HTML structure
+- Some posts may require login (not supported by default)
+- Check if selectors in scraper functions need updating
 
 ## 📝 License
 
-This project is for internal use. Please ensure compliance with social media platform API terms of service.
+This project is for educational and personal use. Please ensure compliance with social media platform API terms of service.
+
+## 🤝 Contributing
+
+Contributions are welcome! Please:
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request

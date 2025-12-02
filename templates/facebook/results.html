@@ -1,0 +1,167 @@
+{% extends "results_base.html" %}
+
+{% block results_title %}Facebook Analytics Results{% endblock %}
+
+{% block bg_gradient %}linear-gradient(135deg, #1877f2 0%, #0e4f9e 100%){% endblock %}
+
+{% block btn_bg %}linear-gradient(135deg, #1877f2 0%, #0e4f9e 100%){% endblock %}
+
+{% block thead_bg %}linear-gradient(135deg, #1877f2 0%, #0e4f9e 100%){% endblock %}
+
+{% block link_color %}#1877f2{% endblock %}
+
+{% block header_title %}📘 Facebook Analytics Results{% endblock %}
+
+{% block table_extra_css %}
+.comments-box {
+    max-height: 150px;
+    overflow-y: auto;
+    background: #f7fafc;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    max-width: 400px;
+}
+
+.comments-box::-webkit-scrollbar {
+    width: 8px;
+}
+
+.comments-box::-webkit-scrollbar-track {
+    background: #edf2f7;
+    border-radius: 4px;
+}
+
+.comments-box::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 4px;
+}
+
+.comments-box ul {
+    list-style: none;
+}
+
+.comments-box li {
+    padding: 8px 0;
+    border-bottom: 1px solid #e2e8f0;
+    color: #4a5568;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.comments-box li:last-child {
+    border-bottom: none;
+}
+
+.no-comments {
+    color: #a0aec0;
+    font-style: italic;
+    text-align: center;
+    padding: 10px;
+}
+
+@media (max-width: 768px) {
+    .comments-box {
+        max-width: 250px;
+    }
+}
+{% endblock %}
+
+{% block stats %}
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="icon">📝</div>
+        <div class="value" id="totalPosts">{{ results|length }}</div>
+        <div class="label">Total Posts</div>
+    </div>
+    <div class="stat-card">
+        <div class="icon">👍</div>
+        <div class="value" id="totalReactions">0</div>
+        <div class="label">Total Reactions</div>
+    </div>
+    <div class="stat-card">
+        <div class="icon">🔄</div>
+        <div class="value" id="totalShares">0</div>
+        <div class="label">Total Shares</div>
+    </div>
+    <div class="stat-card">
+        <div class="icon">💬</div>
+        <div class="value" id="totalComments">0</div>
+        <div class="label">Total Comments</div>
+    </div>
+</div>
+{% endblock %}
+
+{% block table_content %}
+<table>
+    <thead>
+        <tr>
+            <th>Influencer</th>
+            <th>Post Link</th>
+            <th>Reactions</th>
+            <th>Comments</th>
+            <th>Shares</th>
+            <th>Comment Samples</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in results %}
+        <tr data-reactions="{{ row.reactions if row.reactions != 'N/A' else 0 }}" 
+            data-shares="{{ row.shares if row.shares != 'N/A' else 0 }}" 
+            data-comments="{{ row.comments if row.comments != 'N/A' else 0 }}">
+            <td class="name-col">{{ row.name }}</td>
+            <td>
+                <a href="{{ row.link }}" target="_blank" class="post-link" title="{{ row.link }}">
+                    {{ row.link }}
+                </a>
+            </td>
+            <td>
+                <span class="metric reactions">👍 {{ row.reactions }}</span>
+            </td>
+            <td>
+                <span class="metric comments">💬 {{ row.comments }}</span>
+            </td>
+            <td>
+                <span class="metric shares">🔄 {{ row.shares }}</span>
+            </td>
+            <td>
+                {% if row.comment_list %}
+                    <div class="comments-box">
+                        <ul>
+                        {% for c in row.comment_list %}
+                            <li>{{ c }}</li>
+                        {% endfor %}
+                        </ul>
+                    </div>
+                {% else %}
+                    <div class="no-comments">No comments</div>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Calculate totals
+    const rows = document.querySelectorAll('tbody tr');
+    let totalReactions = 0;
+    let totalShares = 0;
+    let totalComments = 0;
+
+    rows.forEach(row => {
+        totalReactions += parseInt(row.dataset.reactions) || 0;
+        totalShares += parseInt(row.dataset.shares) || 0;
+        totalComments += parseInt(row.dataset.comments) || 0;
+    });
+
+    // Format numbers with commas
+    const formatNumber = (num) => num.toLocaleString();
+
+    document.getElementById('totalReactions').textContent = formatNumber(totalReactions);
+    document.getElementById('totalShares').textContent = formatNumber(totalShares);
+    document.getElementById('totalComments').textContent = formatNumber(totalComments);
+</script>
+{% endblock %}

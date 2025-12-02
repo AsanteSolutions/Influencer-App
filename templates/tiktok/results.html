@@ -1,0 +1,105 @@
+{% extends "results_base.html" %}
+
+{% block results_title %}TikTok Analytics Results{% endblock %}
+
+{% block bg_gradient %}linear-gradient(135deg, #06d5d5 0%, #7a00ff 100%){% endblock %}
+
+{% block btn_bg %}linear-gradient(135deg, #06d5d5 0%, #7a00ff 100%){% endblock %}
+
+{% block thead_bg %}linear-gradient(135deg, #06d5d5 0%, #7a00ff 100%){% endblock %}
+
+{% block link_color %}#06d5d5{% endblock %}
+
+{% block header_title %}🎵 TikTok Analytics Results{% endblock %}
+
+{% block stats %}
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="icon">📝</div>
+        <div class="value" id="totalVideos">{{ results|length }}</div>
+        <div class="label">Total Videos</div>
+    </div>
+    <div class="stat-card">
+        <div class="icon">❤️</div>
+        <div class="value" id="totalLikes">0</div>
+        <div class="label">Total Likes</div>
+    </div>
+    <div class="stat-card">
+        <div class="icon">💬</div>
+        <div class="value" id="totalComments">0</div>
+        <div class="label">Total Comments</div>
+    </div>
+    <div class="stat-card">
+        <div class="icon">🔖</div>
+        <div class="value" id="totalSaves">0</div>
+        <div class="label">Total Saves</div>
+    </div>
+</div>
+{% endblock %}
+
+{% block table_content %}
+<table>
+    <thead>
+        <tr>
+            <th>Influencer</th>
+            <th>Video Link</th>
+            <th>Likes</th>
+            <th>Comments</th>
+            <th>Saves</th>
+            <th>Shares</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in results %}
+        <tr data-likes="{{ row.likes if row.likes != 'N/A' else 0 }}" 
+            data-comments="{{ row.comments if row.comments != 'N/A' else 0 }}"
+            data-saves="{{ row.saves if row.saves != 'N/A' else 0 }}"
+            data-shares="{{ row.shares if row.shares != 'N/A' else 0 }}">
+            <td class="name-col">{{ row.name }}</td>
+            <td>
+                <a href="{{ row.link }}" target="_blank" class="post-link" title="{{ row.link }}">
+                    {{ row.link }}
+                </a>
+            </td>
+            <td>
+                <span class="metric reactions">❤️ {{ row.likes }}</span>
+            </td>
+            <td>
+                <span class="metric comments">💬 {{ row.comments }}</span>
+            </td>
+            <td>
+                <span class="metric">🔖 {{ row.saves }}</span>
+            </td>
+            <td>
+                <span class="metric shares">🔄 {{ row.shares }}</span>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Calculate totals
+    const rows = document.querySelectorAll('tbody tr');
+    let totalLikes = 0;
+    let totalComments = 0;
+    let totalSaves = 0;
+    let totalShares = 0;
+
+    rows.forEach(row => {
+        totalLikes += parseInt(row.dataset.likes) || 0;
+        totalComments += parseInt(row.dataset.comments) || 0;
+        totalSaves += parseInt(row.dataset.saves) || 0;
+        totalShares += parseInt(row.dataset.shares) || 0;
+    });
+
+    // Format numbers with commas
+    const formatNumber = (num) => num.toLocaleString();
+
+    document.getElementById('totalLikes').textContent = formatNumber(totalLikes);
+    document.getElementById('totalComments').textContent = formatNumber(totalComments);
+    document.getElementById('totalSaves').textContent = formatNumber(totalSaves);
+</script>
+{% endblock %}

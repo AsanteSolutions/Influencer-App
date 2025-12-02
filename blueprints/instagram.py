@@ -49,13 +49,20 @@ def scrape_instagram_post(url):
 
     try:
         with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True, args=["--no-sandbox"])
-            context = browser.new_context()
+            browser = p.chromium.launch(
+                headless=True, 
+                args=["--no-sandbox", "--disable-blink-features=AutomationControlled"]
+            )
+            context = browser.new_context(
+                user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            )
             page = context.new_page()
-            page.goto(url, wait_until="networkidle", timeout=30000)
+            
+            # Use domcontentloaded instead of networkidle for much faster loading
+            page.goto(url, wait_until="domcontentloaded", timeout=15000)
 
             try:
-                page.wait_for_selector("article", timeout=8000)
+                page.wait_for_selector("article", timeout=5000, state='attached')
             except Exception:
                 pass
 
@@ -111,20 +118,26 @@ def scrape_instagram_post(url):
                 except Exception:
                     pass
 
-            # Grab comments
+            # Grab comments (limit to save time)
             try:
                 nodes = page.query_selector_all('div.C4VMK > span')
-                for node in nodes:
-                    txt = node.inner_text().strip()
-                    if txt:
-                        comment_list.append(txt)
+                for node in nodes[:10]:  # Limit to first 10
+                    try:
+                        txt = node.inner_text(timeout=2000).strip()
+                        if txt:
+                            comment_list.append(txt)
+                    except:
+                        continue
                 
                 if not comment_list:
                     li_nodes = page.query_selector_all('article li')
-                    for l in li_nodes:
-                        txt = l.inner_text().strip()
-                        if txt:
-                            comment_list.append(txt)
+                    for l in li_nodes[:10]:  # Limit to first 10
+                        try:
+                            txt = l.inner_text(timeout=2000).strip()
+                            if txt:
+                                comment_list.append(txt)
+                        except:
+                            continue
                 
                 comments_count = comments_count or len(comment_list)
             except Exception:

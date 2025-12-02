@@ -2,6 +2,8 @@ import os
 import re
 from flask import Flask, render_template, request, flash, redirect, url_for
 from dotenv import load_dotenv
+from functools import lru_cache
+from hashlib import md5
 
 # Import blueprints
 from blueprints import facebook_bp, twitter_bp, instagram_bp, tiktok_bp
@@ -14,6 +16,23 @@ load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "supersecretkey")
+
+# Simple in-memory cache for scraped results (prevents re-scraping same URLs)
+_scrape_cache = {}
+
+def get_cached_scrape(url, scraper_func):
+    """Cache scraper results to avoid re-scraping the same URL."""
+    cache_key = md5(url.encode()).hexdigest()
+    if cache_key in _scrape_cache:
+        return _scrape_cache[cache_key]
+    
+    result = scraper_func(url)
+    if result and "error" not in result:
+        _scrape_cache[cache_key] = result
+        # Limit cache size to 100 entries
+        if len(_scrape_cache) > 100:
+            _scrape_cache.pop(next(iter(_scrape_cache)))
+    return result
 
 # Register blueprints
 app.register_blueprint(facebook_bp)
@@ -50,7 +69,7 @@ def analyze_link():
     if "twitter.com" in link or "x.com" in link:
         platform = "Twitter"
         try:
-            metrics = scrape_tweet(link)
+            metrics = get_cached_scrape(link, scrape_tweet)
         except Exception as e:
             flash("Twitter scraper not available: ensure Playwright is installed.", "error")
             return redirect(url_for("home"))
@@ -69,7 +88,7 @@ def analyze_link():
     elif "instagram.com" in link:
         platform = "Instagram"
         try:
-            metrics = scrape_instagram_post(link)
+            metrics = get_cached_scrape(link, scrape_instagram_post)
         except Exception:
             flash("Instagram scraper not available: ensure Playwright is installed.", "error")
             return redirect(url_for("home"))
@@ -78,7 +97,7 @@ def analyze_link():
     elif "tiktok.com" in link or "vm.tiktok.com" in link:
         platform = "TikTok"
         try:
-            metrics = scrape_tiktok_post(link)
+            metrics = get_cached_scrape(link, scrape_tiktok_post)
         except Exception:
             flash("TikTok scraper not available: ensure Playwright is installed.", "error")
             return redirect(url_for("home"))

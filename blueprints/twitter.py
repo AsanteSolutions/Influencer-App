@@ -19,37 +19,70 @@ def extract_tweet_id(url: str):
 def scrape_tweet(tweet_url):
     """Scrape a public Twitter/X post using Playwright."""
     with sync_playwright() as pw:
-        browser = pw.chromium.launch(headless=True)
-        page = browser.new_page()
+        browser = pw.chromium.launch(
+            headless=True,
+            args=['--disable-blink-features=AutomationControlled', '--no-sandbox']
+        )
+        context = browser.new_context(
+            user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        )
+        page = context.new_page()
 
         try:
-            page.goto(tweet_url, timeout=60000)
-            page.wait_for_selector("article", timeout=15000)
-
-            likes_elem = page.locator('[data-testid="like"]')
-            replies_elem = page.locator('[data-testid="reply"]')
-            retweets_elem = page.locator('[data-testid="retweet"]')
-
-            likes = likes_elem.text_content() if likes_elem.count() > 0 else "0"
-            replies = replies_elem.text_content() if replies_elem.count() > 0 else "0"
-            retweets = retweets_elem.text_content() if retweets_elem.count() > 0 else "0"
-
+            # Use domcontentloaded instead of networkidle for faster loading
+            page.goto(tweet_url, wait_until='domcontentloaded', timeout=15000)
+            
+            # Wait for main content with shorter timeout
+            page.wait_for_selector("article", timeout=8000, state='attached')
+            
+            # Extract metrics with timeout protection
+            likes = "0"
+            replies = "0"
+            retweets = "0"
             views = "N/A"
+            
             try:
-                views_elem = page.locator("span:below(:text('Views'))").nth(0)
-                if views_elem.count() > 0:
-                    views = views_elem.text_content()
+                likes_elem = page.locator('[data-testid="like"]').first
+                if likes_elem.count() > 0:
+                    likes = likes_elem.text_content(timeout=3000) or "0"
             except:
                 pass
 
-            comments = []
-            comment_elements = page.locator('div[data-testid="tweetText"]')
-            count = comment_elements.count()
-            for i in range(min(count, 20)):
-                text = comment_elements.nth(i).text_content()
-                if text:
-                    comments.append(text)
+            try:
+                replies_elem = page.locator('[data-testid="reply"]').first
+                if replies_elem.count() > 0:
+                    replies = replies_elem.text_content(timeout=3000) or "0"
+            except:
+                pass
 
+            try:
+                retweets_elem = page.locator('[data-testid="retweet"]').first
+                if retweets_elem.count() > 0:
+                    retweets = retweets_elem.text_content(timeout=3000) or "0"
+            except:
+                pass
+
+            # Skip views to save time (often causes delays)
+            # try:
+            #     views_elem = page.locator("span:below(:text('Views'))").first
+            #     if views_elem.count() > 0:
+            #         views = views_elem.text_content(timeout=3000) or "N/A"
+            # except:
+            #     pass
+
+            comments = []
+            # Skip comment collection to save time, or limit heavily
+            # try:
+            #     comment_elements = page.locator('div[data-testid="tweetText"]')
+            #     count = min(comment_elements.count(), 5)  # Limit to 5 for speed
+            #     for i in range(count):
+            #         text = comment_elements.nth(i).text_content(timeout=2000)
+            #         if text:
+            #             comments.append(text)
+            # except:
+            #     pass
+
+            context.close()
             browser.close()
 
             return {
@@ -61,7 +94,11 @@ def scrape_tweet(tweet_url):
             }
 
         except Exception as e:
-            browser.close()
+            try:
+                context.close()
+                browser.close()
+            except:
+                pass
             return {"error": str(e)}
 
 
